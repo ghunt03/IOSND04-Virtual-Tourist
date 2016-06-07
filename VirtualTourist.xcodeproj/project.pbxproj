@@ -13,6 +13,9 @@
 		01B435351D069983002C0BF4 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 01B435331D069983002C0BF4 /* LaunchScreen.storyboard */; };
 		01B435401D069983002C0BF4 /* VirtualTouristTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B4353F1D069983002C0BF4 /* VirtualTouristTests.swift */; };
 		01B4354B1D069983002C0BF4 /* VirtualTouristUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B4354A1D069983002C0BF4 /* VirtualTouristUITests.swift */; };
+		01B4355D1D06A1D1002C0BF4 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B4355C1D06A1D1002C0BF4 /* MapViewController.swift */; };
+		01B4355F1D06A52F002C0BF4 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 01B4355E1D06A52F002C0BF4 /* MapKit.framework */; };
+		01B435611D06D483002C0BF4 /* MapViewConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01B435601D06D483002C0BF4 /* MapViewConstants.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,6 +48,9 @@
 		01B435461D069983002C0BF4 /* VirtualTouristUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VirtualTouristUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		01B4354A1D069983002C0BF4 /* VirtualTouristUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VirtualTouristUITests.swift; sourceTree = "<group>"; };
 		01B4354C1D069983002C0BF4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		01B4355C1D06A1D1002C0BF4 /* MapViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
+		01B4355E1D06A52F002C0BF4 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
+		01B435601D06D483002C0BF4 /* MapViewConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapViewConstants.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,6 +58,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				01B4355F1D06A52F002C0BF4 /* MapKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -75,6 +82,7 @@
 		01B4351E1D069982002C0BF4 = {
 			isa = PBXGroup;
 			children = (
+				01B4355E1D06A52F002C0BF4 /* MapKit.framework */,
 				01B435291D069982002C0BF4 /* VirtualTourist */,
 				01B4353E1D069983002C0BF4 /* VirtualTouristTests */,
 				01B435491D069983002C0BF4 /* VirtualTouristUITests */,
@@ -125,6 +133,7 @@
 		01B435581D069A3E002C0BF4 /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				01B435601D06D483002C0BF4 /* MapViewConstants.swift */,
 			);
 			name = Model;
 			sourceTree = "<group>";
@@ -132,6 +141,7 @@
 		01B435591D069A45002C0BF4 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				01B4355C1D06A1D1002C0BF4 /* MapViewController.swift */,
 			);
 			name = Controllers;
 			sourceTree = "<group>";
@@ -222,6 +232,11 @@
 				TargetAttributes = {
 					01B435261D069982002C0BF4 = {
 						CreatedOnToolsVersion = 7.2.1;
+						SystemCapabilities = {
+							com.apple.Maps.iOS = {
+								enabled = 1;
+							};
+						};
 					};
 					01B4353A1D069983002C0BF4 = {
 						CreatedOnToolsVersion = 7.2.1;
@@ -286,6 +301,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				01B4352B1D069982002C0BF4 /* AppDelegate.swift in Sources */,
+				01B4355D1D06A1D1002C0BF4 /* MapViewController.swift in Sources */,
+				01B435611D06D483002C0BF4 /* MapViewConstants.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

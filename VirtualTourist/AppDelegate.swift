@@ -13,9 +13,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
+    func checkIfFirstLaunch() {
+        if (NSUserDefaults.standardUserDefaults().boolForKey("hasLaunchedBefore")) {
+            
+        }
+        else {
+            NSUserDefaults.standardUserDefaults().setBool(true, forKey: "hasLaunchedBefore")
+            NSUserDefaults.standardUserDefaults().setDouble(-33.8675, forKey: MapViewConstants.Constants.lat)
+            NSUserDefaults.standardUserDefaults().setDouble(151.2070, forKey: MapViewConstants.Constants.long)
+            NSUserDefaults.standardUserDefaults().setDouble(0.1, forKey: MapViewConstants.Constants.latDelta)
+            NSUserDefaults.standardUserDefaults().setDouble(0.1, forKey: MapViewConstants.Constants.longDelta)
+            NSUserDefaults.standardUserDefaults().synchronize()
+        }
+    }
+
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
+        checkIfFirstLaunch()
         return true
     }
 
