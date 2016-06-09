@@ -18,7 +18,25 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         super.viewDidLoad()
         mapView.delegate = self
         setPersistedMapLocation()
+        
+        let longPress = UILongPressGestureRecognizer(target: self, action: "dropPin:")
+        longPress.minimumPressDuration = 2.0
+        mapView.addGestureRecognizer(longPress)
+     
     }
+    
+    
+    func dropPin(gestureRecognizer:UIGestureRecognizer) {
+        let touchPoint = gestureRecognizer.locationInView(self.mapView)
+        let newCoord:CLLocationCoordinate2D = mapView.convertPoint(touchPoint, toCoordinateFromView: self.mapView)
+        let newAnotation = MKPointAnnotation()
+        newAnotation.coordinate = newCoord
+        mapView.addAnnotation(newAnotation)
+        
+    }
+    
+    
+    
     
     func setPersistedMapLocation() {
         let latitudeDelta = NSUserDefaults.standardUserDefaults().doubleForKey(MapViewConstants.Constants.latDelta)
@@ -38,6 +56,20 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         NSUserDefaults.standardUserDefaults().setDouble(regionSpan.latitudeDelta, forKey: MapViewConstants.Constants.latDelta)
         NSUserDefaults.standardUserDefaults().setDouble(regionSpan.longitudeDelta, forKey: MapViewConstants.Constants.longDelta)
     }
+    
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if (segue.identifier == "displayLocation") {
+            if let locationVC = segue.destinationViewController as? CollectionViewController {
+                locationVC.mkView = (sender as! MKAnnotationView)
+            }
+        }
+    }
+    
+    func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
+        performSegueWithIdentifier("displayLocation", sender: view)
+    }
+    
     
     
 }
