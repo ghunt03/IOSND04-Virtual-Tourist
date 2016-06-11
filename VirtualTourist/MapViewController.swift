@@ -9,6 +9,7 @@
 import Foundation
 import UIKit
 import MapKit
+import CoreData
 
 class MapViewController: UIViewController, MKMapViewDelegate {
     
@@ -18,25 +19,55 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         super.viewDidLoad()
         mapView.delegate = self
         setPersistedMapLocation()
+        loadLocations()
         
         let longPress = UILongPressGestureRecognizer(target: self, action: "dropPin:")
         longPress.minimumPressDuration = 2.0
         mapView.addGestureRecognizer(longPress)
-     
+        
     }
     
+    var sharedContext: NSManagedObjectContext {
+        let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        return delegate.stack.context
+    }
+    
+    func loadLocations() {
+        // Invoke fetchedResultsController.performFetch(nil) here
+        // Create the fetch request
+        let fr = NSFetchRequest(entityName: "Location")
+        fr.sortDescriptors = [NSSortDescriptor(key: "latitude", ascending: true)]
+        // Create the FetchedResultsController
+        let fc = NSFetchedResultsController(fetchRequest: fr,
+            managedObjectContext: self.sharedContext, sectionNameKeyPath: nil, cacheName: nil)
+        do{
+            try fc.performFetch()
+        }catch let e as NSError{
+            print("Error while trying to perform a search: \n\(e)\n\(fc)")
+        }
+        let locations = fc.fetchedObjects as! [Location]
+        for location in locations {
+            let annotation = MKPointAnnotation()
+            annotation.coordinate = CLLocationCoordinate2D(latitude: Double(location.latitude!), longitude: Double(location.longitude!))
+            mapView.addAnnotation(annotation)
+        }
+    }
     
     func dropPin(gestureRecognizer:UIGestureRecognizer) {
         let touchPoint = gestureRecognizer.locationInView(self.mapView)
         let newCoord:CLLocationCoordinate2D = mapView.convertPoint(touchPoint, toCoordinateFromView: self.mapView)
         let newAnotation = MKPointAnnotation()
         newAnotation.coordinate = newCoord
-        mapView.addAnnotation(newAnotation)
         
+        
+        if (gestureRecognizer.state == .Ended) {
+            mapView.addAnnotation(newAnotation)
+            let newLocation = Location(latitude: Double(newCoord.latitude),
+                longitude: Double(newCoord.longitude),
+                context: self.sharedContext)
+            print("Created a new location: \(newLocation)")
+        }
     }
-    
-    
-    
     
     func setPersistedMapLocation() {
         let latitudeDelta = NSUserDefaults.standardUserDefaults().doubleForKey(MapViewConstants.Constants.latDelta)
@@ -61,10 +92,34 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if (segue.identifier == "displayLocation") {
             if let locationVC = segue.destinationViewController as? CollectionViewController {
-                locationVC.mkView = (sender as! MKAnnotationView)
+                let coords = (sender as! MKAnnotationView).annotation?.coordinate
+                locationVC.location = getLocationByCoordinates((coords?.latitude)!, longitude: (coords?.longitude)!)
             }
         }
     }
+    
+    
+    func getLocationByCoordinates(latitude: Double, longitude: Double) -> Location? {
+        let fr = NSFetchRequest(entityName: "Location")
+        fr.sortDescriptors = [NSSortDescriptor(key: "latitude", ascending: true)]
+        
+        
+        let p = NSPredicate(format: "latitude = %@ and longitude = %@", argumentArray: [latitude, longitude])
+        fr.predicate = p
+        
+        // Create the FetchedResultsController
+        let fc = NSFetchedResultsController(fetchRequest: fr,
+            managedObjectContext: self.sharedContext, sectionNameKeyPath: nil, cacheName: nil)
+        do{
+            try fc.performFetch()
+        }catch let e as NSError{
+            print("Error while trying to perform a search: \n\(e)\n\(fc)")
+        }
+        let locations = fc.fetchedObjects as! [Location]
+        return locations[0]
+        
+    }
+    
     
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
         performSegueWithIdentifier("displayLocation", sender: view)

@@ -9,30 +9,33 @@
 import Foundation
 import UIKit
 import MapKit
+import CoreData
 
 class CollectionViewController: UIViewController, MKMapViewDelegate {
 
     @IBOutlet weak var mapView: MKMapView!
-    var mkView: MKAnnotationView?
+    var location: Location!
+    let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setMapLocation()
+        
     }
     
     func setMapLocation() {
-        if (mkView != nil) {
-            let newCoord = mkView?.annotation?.coordinate
-            
+        if (location != nil) {
+            let annotation = MKPointAnnotation()
+            annotation.coordinate = CLLocationCoordinate2D(latitude: Double(location.latitude!), longitude: Double(location.longitude!))
             let span = MKCoordinateSpanMake(0.05, 0.05)
-            let region = MKCoordinateRegion(center: newCoord!, span: span)
-            let newAnotation = MKPointAnnotation()
-            newAnotation.coordinate = newCoord!
-            mapView.addAnnotation(newAnotation)
-
-            mapView.setRegion(region, animated: true)
+            let region = MKCoordinateRegion(center: annotation.coordinate, span: span)
+            self.mapView.setRegion(region, animated: true)
+            mapView.addAnnotation(annotation)
         }
+        
     }
+   
     
     
 }
