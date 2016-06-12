@@ -1,8 +1,8 @@
 //
-//  Location+CoreDataProperties.swift
+//  Photo+CoreDataProperties.swift
 //  VirtualTourist
 //
-//  Created by Gareth Hunt on 9/06/2016.
+//  Created by Gareth Hunt on 12/06/2016.
 //  Copyright © 2016 ghunt03. All rights reserved.
 //
 //  Choose "Create NSManagedObject Subclass…" from the Core Data editor menu
@@ -12,9 +12,12 @@
 import Foundation
 import CoreData
 
-extension Location {
+extension Photo {
 
-    @NSManaged var latitude: NSNumber?
-    @NSManaged var longitude: NSNumber?
+    @NSManaged var id: String?
+    @NSManaged var photoData: NSData?
+    @NSManaged var title: String?
+    @NSManaged var url: String?
+    @NSManaged var pin: Pin?
 
 }

@@ -14,17 +14,54 @@ import CoreData
 class MapViewController: UIViewController, MKMapViewDelegate {
     
     @IBOutlet var mapView: MKMapView!
+    @IBOutlet weak var editButton: UIBarButtonItem!
+    var removeMode: Bool = false
+    var label: UILabel?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         mapView.delegate = self
         setPersistedMapLocation()
         loadLocations()
+        createLabel()
         
+        
+    }
+    
+    func createLabel(){
+        let x = self.view.frame.origin.x
+        let y = self.view.frame.origin.y + view.frame.height - 40
+        let rect = CGRect(x: x, y: y, width: view.frame.width, height: 40)
+        label = UILabel(frame: rect)
+        label!.center = CGPointMake(view.frame.width/2, view.frame.height-20)
+        label!.text = "Tap pins to delete"
+        label!.textAlignment = .Center
+        label!.textColor = UIColor.whiteColor()
+        label!.backgroundColor = UIColor.redColor()
+    }
+    
+    @IBAction func editButtonPressed(sender: AnyObject) {
+        if removeMode {
+            removeMode = false
+            editButton.title = "Edit"
+            //hide label
+            view.frame.origin.y += 40
+            label!.removeFromSuperview()
+        }
+        else {
+            removeMode = true
+            editButton.title = "Done"
+            //show label
+            view.frame.origin.y -= 40
+            view.superview?.addSubview(label!)
+        }
+    }
+    
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
         let longPress = UILongPressGestureRecognizer(target: self, action: "dropPin:")
         longPress.minimumPressDuration = 2.0
         mapView.addGestureRecognizer(longPress)
-        
     }
     
     var sharedContext: NSManagedObjectContext {
@@ -35,7 +72,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     func loadLocations() {
         // Invoke fetchedResultsController.performFetch(nil) here
         // Create the fetch request
-        let fr = NSFetchRequest(entityName: "Location")
+        let fr = NSFetchRequest(entityName: "Pin")
         fr.sortDescriptors = [NSSortDescriptor(key: "latitude", ascending: true)]
         // Create the FetchedResultsController
         let fc = NSFetchedResultsController(fetchRequest: fr,
@@ -45,7 +82,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         }catch let e as NSError{
             print("Error while trying to perform a search: \n\(e)\n\(fc)")
         }
-        let locations = fc.fetchedObjects as! [Location]
+        let locations = fc.fetchedObjects as! [Pin]
         for location in locations {
             let annotation = MKPointAnnotation()
             annotation.coordinate = CLLocationCoordinate2D(latitude: Double(location.latitude!), longitude: Double(location.longitude!))
@@ -62,7 +99,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         
         if (gestureRecognizer.state == .Ended) {
             mapView.addAnnotation(newAnotation)
-            let newLocation = Location(latitude: Double(newCoord.latitude),
+            let newLocation = Pin(latitude: Double(newCoord.latitude),
                 longitude: Double(newCoord.longitude),
                 context: self.sharedContext)
             print("Created a new location: \(newLocation)")
@@ -92,15 +129,14 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if (segue.identifier == "displayLocation") {
             if let locationVC = segue.destinationViewController as? CollectionViewController {
-                let coords = (sender as! MKAnnotationView).annotation?.coordinate
-                locationVC.location = getLocationByCoordinates((coords?.latitude)!, longitude: (coords?.longitude)!)
+                locationVC.location = (sender as! Pin)
             }
         }
     }
     
     
-    func getLocationByCoordinates(latitude: Double, longitude: Double) -> Location? {
-        let fr = NSFetchRequest(entityName: "Location")
+    func getLocationByCoordinates(latitude: Double, longitude: Double) -> Pin? {
+        let fr = NSFetchRequest(entityName: "Pin")
         fr.sortDescriptors = [NSSortDescriptor(key: "latitude", ascending: true)]
         
         
@@ -115,14 +151,22 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         }catch let e as NSError{
             print("Error while trying to perform a search: \n\(e)\n\(fc)")
         }
-        let locations = fc.fetchedObjects as! [Location]
+        let locations = fc.fetchedObjects as! [Pin]
         return locations[0]
         
     }
     
     
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
-        performSegueWithIdentifier("displayLocation", sender: view)
+        let coords = view.annotation?.coordinate
+        let pin = getLocationByCoordinates((coords?.latitude)!, longitude: (coords?.longitude)!)
+        if (removeMode) {
+            mapView.removeAnnotation(view.annotation!)
+            sharedContext.deleteObject(pin!)
+        }
+        else {
+            performSegueWithIdentifier("displayLocation", sender: pin)
+        }
     }
     
     

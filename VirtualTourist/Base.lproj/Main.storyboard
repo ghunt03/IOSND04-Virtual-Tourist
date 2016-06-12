@@ -30,15 +30,22 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     </mapView>
-                    <navigationItem key="navigationItem" title="Virtual Tourist" id="lSt-Gd-GZP"/>
+                    <navigationItem key="navigationItem" title="Virtual Tourist" id="lSt-Gd-GZP">
+                        <barButtonItem key="rightBarButtonItem" title="Edit" id="H6X-Pd-ZIF">
+                            <connections>
+                                <action selector="editButtonPressed:" destination="NFx-tw-ZJf" id="BEb-YY-gD7"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
+                        <outlet property="editButton" destination="H6X-Pd-ZIF" id="nEm-N8-Zj9"/>
                         <outlet property="mapView" destination="BhV-hh-rtN" id="87Z-6o-oST"/>
                         <segue destination="UEA-nv-Vgk" kind="show" identifier="displayLocation" id="KLN-cP-veG"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="nMg-Rr-KFe" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="703" y="494"/>
+            <point key="canvasLocation" x="688" y="464"/>
         </scene>
         <!--Virtual Tourist-->
         <scene sceneID="WTy-qk-DiD">
@@ -62,20 +69,39 @@
                                 <rect key="frame" x="0.0" y="191" width="600" height="366"/>
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="eTN-0x-fYT">
-                                    <size key="itemSize" width="50" height="50"/>
+                                    <size key="itemSize" width="149" height="144"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
                                     <size key="footerReferenceSize" width="0.0" height="0.0"/>
                                     <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 </collectionViewFlowLayout>
                                 <cells>
-                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" id="Yz7-7X-8PC">
-                                        <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
+                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="collectionViewCell" id="Yz7-7X-8PC" customClass="ImageCollectionCell" customModule="VirtualTourist" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="0.0" width="149" height="144"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
-                                            <rect key="frame" x="0.0" y="0.0" width="50" height="50"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="149" height="144"/>
                                             <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="eNy-SM-LfZ">
+                                                    <rect key="frame" x="-31" y="8" width="240" height="128"/>
+                                                </imageView>
+                                                <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="vWq-cc-T2m">
+                                                    <rect key="frame" x="64" y="68" width="20" height="20"/>
+                                                </activityIndicatorView>
+                                            </subviews>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         </view>
+                                        <constraints>
+                                            <constraint firstAttribute="trailingMargin" secondItem="eNy-SM-LfZ" secondAttribute="trailing" constant="-68" id="9AR-sp-BCR"/>
+                                            <constraint firstItem="vWq-cc-T2m" firstAttribute="top" secondItem="Yz7-7X-8PC" secondAttribute="topMargin" constant="60" id="M0o-TW-sLa"/>
+                                            <constraint firstItem="vWq-cc-T2m" firstAttribute="centerX" secondItem="Yz7-7X-8PC" secondAttribute="centerX" id="MaY-vf-6YB"/>
+                                            <constraint firstItem="eNy-SM-LfZ" firstAttribute="bottom" secondItem="Yz7-7X-8PC" secondAttribute="bottomMargin" id="UOm-ZH-Mkf"/>
+                                            <constraint firstItem="eNy-SM-LfZ" firstAttribute="leading" secondItem="Yz7-7X-8PC" secondAttribute="leadingMargin" constant="-39" id="cD0-aX-2Ha"/>
+                                            <constraint firstItem="eNy-SM-LfZ" firstAttribute="top" secondItem="Yz7-7X-8PC" secondAttribute="topMargin" id="j1A-lH-eY7"/>
+                                        </constraints>
+                                        <connections>
+                                            <outlet property="activityIndicator" destination="vWq-cc-T2m" id="dkc-wY-e35"/>
+                                        </connections>
                                     </collectionViewCell>
                                 </cells>
                             </collectionView>
@@ -110,6 +136,8 @@
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="collView" destination="pBX-nP-Wte" id="u91-tS-omn"/>
+                        <outlet property="flowLayoutControl" destination="eTN-0x-fYT" id="CNv-Pk-JwW"/>
                         <outlet property="mapView" destination="o0q-tw-mAa" id="jaB-vy-Jjb"/>
                     </connections>
                 </viewController>
