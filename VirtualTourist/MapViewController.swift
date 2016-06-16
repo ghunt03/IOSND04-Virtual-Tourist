@@ -17,7 +17,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     @IBOutlet weak var editButton: UIBarButtonItem!
     var removeMode: Bool = false
     var label: UILabel?
-    
+    let flickrClient = FlickrClient.sharedInstance
     override func viewDidLoad() {
         super.viewDidLoad()
         mapView.delegate = self
@@ -64,9 +64,9 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         mapView.addGestureRecognizer(longPress)
     }
     
-    var sharedContext: NSManagedObjectContext {
+    var sharedDataInstance: CoreDataStack {
         let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        return delegate.stack.context
+        return delegate.stack
     }
     
     func loadLocations() {
@@ -76,7 +76,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         fr.sortDescriptors = [NSSortDescriptor(key: "latitude", ascending: true)]
         // Create the FetchedResultsController
         let fc = NSFetchedResultsController(fetchRequest: fr,
-            managedObjectContext: self.sharedContext, sectionNameKeyPath: nil, cacheName: nil)
+            managedObjectContext: self.sharedDataInstance.context, sectionNameKeyPath: nil, cacheName: nil)
         do{
             try fc.performFetch()
         }catch let e as NSError{
@@ -101,8 +101,19 @@ class MapViewController: UIViewController, MKMapViewDelegate {
             mapView.addAnnotation(newAnotation)
             let newLocation = Pin(latitude: Double(newCoord.latitude),
                 longitude: Double(newCoord.longitude),
-                context: self.sharedContext)
-            print("Created a new location: \(newLocation)")
+                context: self.sharedDataInstance.context)
+            performUIUpdatesOnMain {
+                self.flickrClient.getImages(newLocation, context: self.sharedDataInstance.context) {
+                    (results, error) in
+                    if error == nil {
+                        print(error)
+                    }
+                    else {
+                        self.sharedDataInstance.save()
+                    }
+                }
+                print("Created a new location: \(newLocation)")
+            }
         }
     }
     
@@ -128,6 +139,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if (segue.identifier == "displayLocation") {
+
             if let locationVC = segue.destinationViewController as? CollectionViewController {
                 locationVC.location = (sender as! Pin)
             }
@@ -145,7 +157,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         
         // Create the FetchedResultsController
         let fc = NSFetchedResultsController(fetchRequest: fr,
-            managedObjectContext: self.sharedContext, sectionNameKeyPath: nil, cacheName: nil)
+            managedObjectContext: self.sharedDataInstance.context, sectionNameKeyPath: nil, cacheName: nil)
         do{
             try fc.performFetch()
         }catch let e as NSError{
@@ -162,10 +174,12 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         let pin = getLocationByCoordinates((coords?.latitude)!, longitude: (coords?.longitude)!)
         if (removeMode) {
             mapView.removeAnnotation(view.annotation!)
-            sharedContext.deleteObject(pin!)
+            sharedDataInstance.context.deleteObject(pin!)
         }
         else {
+            self.mapView.deselectAnnotation(view.annotation!, animated: true)
             performSegueWithIdentifier("displayLocation", sender: pin)
+            
         }
     }
     

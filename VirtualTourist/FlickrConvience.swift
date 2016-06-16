@@ -7,10 +7,15 @@
 //
 
 import Foundation
-
+import CoreData
+import UIKit
 extension FlickrClient {
     
-    func getImages(location: Pin, completionHandlerForGetImages: (result: AnyObject?, error: String?)->Void) {
+    
+   
+
+    
+    func getImages(location: Pin, context: NSManagedObjectContext, completionHandlerForGetImages: (result: AnyObject?, error: String?)->Void) {
         let parameters = [
             ParameterKeys.Method: ParameterValues.SearchMethod,
             ParameterKeys.APIKey: ParameterValues.APIKey,
@@ -35,15 +40,32 @@ extension FlickrClient {
                 completionHandlerForGetImages(result: nil, error: "Cannot find keys '\(ResponseKeys.PhotoList)' in \(photosDictionary)")
                 return
             }
-            completionHandlerForGetImages(result: photos, error: nil)
+            
+
+                for photoDictionary in photos {
+                    let p = Photo(id: photoDictionary["id"] as! String,
+                        photoURL: photoDictionary["url_m"] as! String,
+                        title: photoDictionary["title"] as! String,
+                        context: context)
+                    p.pin = location
+                    self.getImageFromURL(p) {
+                        (result, error) in
+                    }
+                }
+            
+            
+            completionHandlerForGetImages(result: true, error: nil)
         }
         
     }
     
-    func getImageFromURL(imageUrlString: String, completionHandlerForGetImageFromURL: (result: AnyObject?, error: String?)->Void) {
-        let imageURL = NSURL(string: imageUrlString)
+   
+    
+    func getImageFromURL(photo: Photo, completionHandlerForGetImageFromURL: (result: AnyObject?, error: String?)->Void) {
+        let imageURL = NSURL(string: photo.url!)
         if let imageData = NSData(contentsOfURL: imageURL!) {
-            completionHandlerForGetImageFromURL(result: imageData, error: nil)
+            photo.photoData = imageData
+            completionHandlerForGetImageFromURL(result: "Image downloaded from \(imageURL)", error: nil)
         }
         else {
             completionHandlerForGetImageFromURL(result: nil, error: "Image does not exist at \(imageURL)")

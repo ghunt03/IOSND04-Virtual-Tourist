@@ -13,13 +13,12 @@ import CoreData
 class Photo: NSManagedObject {
 
 // Insert code here to add functionality to your managed object subclass
-    convenience init(id: String, photoURL: String, title: String, photoData: NSData, context: NSManagedObjectContext){
+    convenience init(id: String, photoURL: String, title: String, context: NSManagedObjectContext){
         if let ent = NSEntityDescription.entityForName("Photo", inManagedObjectContext: context) {
             self.init(entity:ent, insertIntoManagedObjectContext: context)
             self.id = id
             self.url = photoURL
             self.title = title
-            self.photoData = photoData
         } else {
             fatalError("Unable to find entity name!")
         }

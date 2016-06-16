@@ -17,63 +17,48 @@ class CollectionViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     var location: Pin!
     let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
     let flickrClient = FlickrClient.sharedInstance
+    var selectedCellIndexes = [NSIndexPath]()
+    var editMode = false
     
     @IBOutlet weak var collView: UICollectionView!
     @IBOutlet weak var flowLayoutControl: UICollectionViewFlowLayout!
     
+    @IBOutlet weak var actionButton: UIBarButtonItem!
     override func viewDidLoad() {
         super.viewDidLoad()
+    }
+    
+    var sharedDataInstance: CoreDataStack {
+        let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        return delegate.stack
     }
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         setMapLocation()
         
-        
         let space: CGFloat = 3.0
         let dimension = (view.frame.size.width - (2 * space)) / 3.0
-        
         flowLayoutControl.minimumInteritemSpacing = space
         flowLayoutControl.itemSize = CGSizeMake(dimension, dimension)
-
         
         collView.delegate = self
         collView.dataSource = self
         
+        fetchedResultsController.delegate = self
+        fetchData()
+        
+    }
+    
+    
+    func fetchData() {
         do {
             try fetchedResultsController.performFetch()
         }catch(let error){
             print(error)
         }
-        fetchedResultsController.delegate = self
-        if fetchedResultsController.fetchedObjects?.count == 0 {
-            flickrClient.getImages(location) {
-                (results, error) in
-                if error == nil {
-                    for photoDictionary in results as! [[String: AnyObject]]{
-                        self.flickrClient.getImageFromURL(photoDictionary["url_m"] as! String) {
-                            (imageData, error) in
-                            if (error == nil) {
-                                let p = Photo(id: photoDictionary["id"] as! String,
-                                    photoURL: photoDictionary["url_m"] as! String,
-                                    title: photoDictionary["title"] as! String,
-                                    photoData: imageData as! NSData,
-                                    context: self.sharedContext)
-                                p.pin = self.location
-                                print(imageData)
-                            }
-                        }
-                        
-                                            }
-                }
-                else {
-                    print(error)
-                }
-            }
-
-        }
-        
     }
+    
     
     func setMapLocation() {
         if (location != nil) {
@@ -92,6 +77,7 @@ class CollectionViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         return delegate.stack.context
     }
     
+    
     lazy var fetchedResultsController: NSFetchedResultsController = {
         let fetchRequest = NSFetchRequest(entityName: "Photo")
         fetchRequest.predicate = NSPredicate(format: "pin == %@", self.location)
@@ -100,6 +86,20 @@ class CollectionViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         return fetchedResultsController
     }()
     
+    @IBAction func actionButtonPressed(sender: AnyObject) {
+        if editMode {
+            for indexPath in selectedCellIndexes {
+                let photoToDelete = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
+                sharedDataInstance.context.deleteObject(photoToDelete)
+            }
+            selectedCellIndexes.removeAll()
+            editMode = false
+            actionButton.title = "New Collection"
+            fetchData()
+            collView.reloadData()
+        }
+    }
+    
     //COLLECTION VIEW METHODS
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int{
         return self.fetchedResultsController.sections![section].numberOfObjects
@@ -107,8 +107,26 @@ class CollectionViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     
     
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath){
+        let cell = collView.cellForItemAtIndexPath(indexPath)
+        if let index = selectedCellIndexes.indexOf(indexPath){
+            selectedCellIndexes.removeAtIndex(index)
+            cell!.layer.borderWidth = 0
+
+        } else {
+            selectedCellIndexes.append(indexPath)
+            cell!.layer.borderColor = UIColor.redColor().CGColor
+            cell!.layer.borderWidth = 5
+        }
+        if selectedCellIndexes.count > 0 {
+            editMode = true
+            actionButton.title = "Remove Selected Images"
+        }
+        else {
+            editMode = false
+            actionButton.title = "New Collection"
+        }
         
-        
+
         
         
     }
@@ -116,17 +134,15 @@ class CollectionViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell{
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("collectionViewCell", forIndexPath: indexPath) as! ImageCollectionCell
         let photo = fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
-        cell.layer.cornerRadius = 5
-        cell.backgroundColor = UIColor.lightGrayColor()
-        cell.activityIndicator.startAnimating()
-        
         if (photo.photoData != nil) {
             let image = UIImage(data: photo.photoData!)
-            print(photo)
-            print(image)
             cell.imageView.image = image
         }
-
+        else {
+            cell.layer.cornerRadius = 5
+            cell.backgroundColor = UIColor.lightGrayColor()
+            cell.activityIndicator.startAnimating()
+        }
         return cell
     }
 

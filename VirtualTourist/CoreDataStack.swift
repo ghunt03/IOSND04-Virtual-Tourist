@@ -15,6 +15,8 @@ typealias BatchTask=(workerContext: NSManagedObjectContext) -> ()
 enum CoreDataStackNotifications : String{
     case ImportingTaskDidFinish = "ImportingTaskDidFinish"
 }
+
+
 // MARK:  - Main
 struct CoreDataStack {
     
@@ -26,6 +28,8 @@ struct CoreDataStack {
     private let persistingContext : NSManagedObjectContext
     private let backgroundContext : NSManagedObjectContext
     let context : NSManagedObjectContext
+    
+
     
     
     // MARK:  - Initializers
