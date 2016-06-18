@@ -94,4 +94,30 @@ class FlickrClient: NSObject {
         let request = createRequest("GET", methodURL: "", parameters: parameters, jsonData: nil)
         return createTask(request, completionHandlerForTask: completionHandlerForGET)
     }
+    
+    func taskForGETImageMethod(imageUrl: String, completionHanlderForGETImage: (results: NSData!, error: String?)->Void) -> NSURLSessionDataTask {
+        let imgURL: NSURL = NSURL(string: imageUrl)!
+        let request: NSURLRequest = NSURLRequest(URL: imgURL)
+        let task = session.dataTaskWithRequest(request) {
+            (data, response, error) in
+            guard (error == nil) else {
+                completionHanlderForGETImage(results: nil, error: "There was an error with your request \(error)")
+                return
+            }
+            guard let statusCode = (response as? NSHTTPURLResponse)?.statusCode where statusCode >= 200 && statusCode <= 299 else {
+                completionHanlderForGETImage(results: nil, error: "Your request returned a status code other than 2xx!")
+                return
+            }
+            guard let data = data else {
+                completionHanlderForGETImage(results: nil, error: "There was no data returned by the request")
+                return
+            }
+            completionHanlderForGETImage(results: data, error: nil)
+            
+        }
+        task.resume()
+        return task
+    }
+    
+    
 }

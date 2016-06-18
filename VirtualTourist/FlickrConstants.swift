@@ -14,12 +14,12 @@ extension FlickrClient {
         static let ApiHost = "api.flickr.com"
         static let ApiPath = "/services/rest"
         
-        static let SearchBBoxHalfWidth = 1.0
-        static let SearchBBoxHalfHeight = 1.0
+        static let SearchBBoxHalfWidth = 0.02
+        static let SearchBBoxHalfHeight = 0.02
         static let SearchLatRange = (-90.0, 90.0)
         static let SearchLonRange = (-180.0, 180.0)
         
-        static let MaxImages = 10
+        static let MaxPages = 40
     }
     
     struct ParameterKeys {
@@ -34,6 +34,9 @@ extension FlickrClient {
         static let BoundingBox = "bbox"
         static let Page = "page"
         static let PerPage = "per_page"
+        static let Lat = "lat"
+        static let Lon = "lon"
+        static let Radius = "radius"
     }
     
     // MARK: Flickr Parameter Values
@@ -44,12 +47,16 @@ extension FlickrClient {
         static let DisableJSONCallback = "1" /* 1 means "yes" */
         static let MediumURL = "url_m"
         static let UseSafeSearch = "1"
-        static let PerPage = "20"
+        static let PerPage = "21"
+        static let Radius = "5"
     }
     
     struct ResponseKeys {
         static let Photos = "photos"
         static let PhotoList = "photo"
         static let ImageUrl = "url_m"
+        static let Pages = "pages"
+        static let Title = "title"
+        static let Id = "id"
     }
 }

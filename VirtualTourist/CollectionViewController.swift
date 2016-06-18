@@ -17,13 +17,23 @@ class CollectionViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     var location: Pin!
     let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
     let flickrClient = FlickrClient.sharedInstance
-    var selectedCellIndexes = [NSIndexPath]()
+    
     var editMode = false
+    
+    var selectedCellIndexes = [NSIndexPath]()
+    var deletedCellIndexes = [NSIndexPath]()
+    var insertedCellIndexes = [NSIndexPath]()
+    var updatedCellIndexes = [NSIndexPath]()
+    
+    
+    
+    @IBOutlet weak var noImageLabel: UILabel!
     
     @IBOutlet weak var collView: UICollectionView!
     @IBOutlet weak var flowLayoutControl: UICollectionViewFlowLayout!
-    
     @IBOutlet weak var actionButton: UIBarButtonItem!
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
     }
@@ -33,10 +43,14 @@ class CollectionViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         return delegate.stack
     }
     
+    
+
+    
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
         setMapLocation()
-        
+        actionButton.enabled = false
+        noImageLabel.hidden = true
         let space: CGFloat = 3.0
         let dimension = (view.frame.size.width - (2 * space)) / 3.0
         flowLayoutControl.minimumInteritemSpacing = space
@@ -48,12 +62,20 @@ class CollectionViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         fetchedResultsController.delegate = self
         fetchData()
         
+        
     }
     
     
     func fetchData() {
         do {
             try fetchedResultsController.performFetch()
+            if (fetchedResultsController.fetchedObjects?.count == 0) {
+                print("no images")
+                noImageLabel.hidden = false
+            }
+            else {
+                noImageLabel.hidden = true
+            }
         }catch(let error){
             print(error)
         }
@@ -98,12 +120,47 @@ class CollectionViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
             fetchData()
             collView.reloadData()
         }
+        else {
+            
+            //delete pics
+            actionButton.enabled = false
+            for photo in fetchedResultsController.fetchedObjects as! [Photo]{
+                sharedDataInstance.context.deleteObject(photo)
+            }
+            performUIUpdatesOnMain {
+                self.flickrClient.getImages(self.location, context: self.sharedDataInstance.context) {
+                    (results, error) in
+                    if error != nil {
+                        print(error)
+                    } else {
+                        self.sharedDataInstance.save()
+                    }
+                }
+            }
+            self.fetchData()
+            self.collView.reloadData()
+        }
     }
     
-    //COLLECTION VIEW METHODS
-    func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int{
-        return self.fetchedResultsController.sections![section].numberOfObjects
+    
+    //MARK: - Collection View Data Source methods
+    
+    func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
+        
+        return self.fetchedResultsController.sections?.count ?? 0
     }
+    
+    
+    func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        
+        let sectionInfo = self.fetchedResultsController.sections![section]
+        
+        return sectionInfo.numberOfObjects
+        
+    }
+    
+    
+    
     
     
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath){
@@ -125,10 +182,6 @@ class CollectionViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
             editMode = false
             actionButton.title = "New Collection"
         }
-        
-
-        
-        
     }
     
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell{
@@ -137,13 +190,72 @@ class CollectionViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         if (photo.photoData != nil) {
             let image = UIImage(data: photo.photoData!)
             cell.imageView.image = image
+            cell.activityIndicator.stopAnimating()
         }
         else {
             cell.layer.cornerRadius = 5
             cell.backgroundColor = UIColor.lightGrayColor()
             cell.activityIndicator.startAnimating()
+            cell.imageView.image = nil
         }
         return cell
     }
+    
+    func controller(controller: NSFetchedResultsController, didChangeSection sectionInfo: NSFetchedResultsSectionInfo, atIndex sectionIndex: Int, forChangeType type: NSFetchedResultsChangeType) {
+        switch type {
+            case .Insert:
+                collView.insertSections(NSIndexSet(index: sectionIndex))
+            case .Delete:
+                collView.deleteSections(NSIndexSet(index: sectionIndex))
+            default:
+                return
+        }
+    }
+    
+    func controller(controller: NSFetchedResultsController,
+        didChangeObject anObject: AnyObject,
+        atIndexPath indexPath: NSIndexPath?,
+        forChangeType type: NSFetchedResultsChangeType,
+        newIndexPath: NSIndexPath?) {
+            
+            
+            switch type {
+                case .Insert:
+                    insertedCellIndexes.append(newIndexPath!)
+                case .Delete:
+                    deletedCellIndexes.append(indexPath!)
+                case .Move:
+                    collView.deleteItemsAtIndexPaths([indexPath!])
+                    collView.insertItemsAtIndexPaths([newIndexPath!])
+            case .Update:
+                updatedCellIndexes.append(indexPath!)
+        }
+    }
+    
+    func controllerWillChangeContent(controller: NSFetchedResultsController) {
+        
+        //Reset the arrays that track the indexPaths to handle the changes in content
+        deletedCellIndexes.removeAll()
+        insertedCellIndexes.removeAll()
+        updatedCellIndexes.removeAll()
+    }
+    
+    func controllerDidChangeContent(controller: NSFetchedResultsController) {
+        if controller.fetchedObjects?.count > 0 {
+            actionButton.enabled = true
+        }
+        collView.performBatchUpdates({ () -> Void in
+            for indexPath in self.insertedCellIndexes {
+                self.collView.insertItemsAtIndexPaths([indexPath])
+            }
+            for indexPath in self.deletedCellIndexes {
+                self.collView.deleteItemsAtIndexPaths([indexPath])
+            }
+            for indexPath in self.updatedCellIndexes {
+                self.collView.reloadItemsAtIndexPaths([indexPath])
+            }
+        }, completion: nil)
+    }
+    
 
 }

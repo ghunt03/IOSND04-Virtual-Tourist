@@ -18,14 +18,20 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     var removeMode: Bool = false
     var label: UILabel?
     let flickrClient = FlickrClient.sharedInstance
+
     override func viewDidLoad() {
         super.viewDidLoad()
         mapView.delegate = self
         setPersistedMapLocation()
         loadLocations()
         createLabel()
-        
-        
+    }
+    
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        let longPress = UILongPressGestureRecognizer(target: self, action: "dropPin:")
+        longPress.minimumPressDuration = 2.0
+        mapView.addGestureRecognizer(longPress)
     }
     
     func createLabel(){
@@ -57,12 +63,7 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         }
     }
     
-    override func viewWillAppear(animated: Bool) {
-        super.viewWillAppear(animated)
-        let longPress = UILongPressGestureRecognizer(target: self, action: "dropPin:")
-        longPress.minimumPressDuration = 2.0
-        mapView.addGestureRecognizer(longPress)
-    }
+
     
     var sharedDataInstance: CoreDataStack {
         let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
@@ -103,13 +104,18 @@ class MapViewController: UIViewController, MKMapViewDelegate {
                 longitude: Double(newCoord.longitude),
                 context: self.sharedDataInstance.context)
             performUIUpdatesOnMain {
-                self.flickrClient.getImages(newLocation, context: self.sharedDataInstance.context) {
+                self.flickrClient.getPages(newLocation, context: self.sharedDataInstance.context) {
                     (results, error) in
-                    if error == nil {
-                        print(error)
-                    }
-                    else {
-                        self.sharedDataInstance.save()
+                    if (error == nil) {
+                        self.flickrClient.getImages(newLocation, context: self.sharedDataInstance.context) {
+                            (results, error) in
+                            if error != nil {
+                                print(error)
+                            }
+                            else {
+                                self.sharedDataInstance.save()
+                            }
+                        }
                     }
                 }
                 print("Created a new location: \(newLocation)")

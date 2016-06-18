@@ -85,7 +85,7 @@
                                                 <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="eNy-SM-LfZ">
                                                     <rect key="frame" x="-31" y="8" width="240" height="128"/>
                                                 </imageView>
-                                                <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="vWq-cc-T2m">
+                                                <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="vWq-cc-T2m">
                                                     <rect key="frame" x="64" y="68" width="20" height="20"/>
                                                 </activityIndicatorView>
                                             </subviews>
@@ -124,22 +124,33 @@
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="uGD-ec-U7p"/>
                                 </items>
                             </toolbar>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="No Images Available for this location" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ggm-9o-91y">
+                                <rect key="frame" x="0.0" y="250" width="600" height="21"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="pBX-nP-Wte" firstAttribute="leading" secondItem="o0q-tw-mAa" secondAttribute="leading" id="1JC-SO-1ef"/>
                             <constraint firstItem="pBX-nP-Wte" firstAttribute="leading" secondItem="eoU-ka-mUd" secondAttribute="leading" id="2fQ-9K-weB"/>
                             <constraint firstItem="o0q-tw-mAa" firstAttribute="trailing" secondItem="3aW-Qi-N3O" secondAttribute="trailing" id="LcO-0Q-PZJ"/>
+                            <constraint firstItem="ggm-9o-91y" firstAttribute="leading" secondItem="IEN-Vp-A7V" secondAttribute="leadingMargin" constant="-20" id="Myf-yv-ouc"/>
                             <constraint firstItem="o0q-tw-mAa" firstAttribute="trailing" secondItem="pBX-nP-Wte" secondAttribute="trailing" id="Rpm-gB-i7o"/>
+                            <constraint firstItem="ggm-9o-91y" firstAttribute="top" secondItem="o0q-tw-mAa" secondAttribute="bottom" constant="60" id="S5h-Kz-U3u"/>
                             <constraint firstItem="o0q-tw-mAa" firstAttribute="leading" secondItem="3aW-Qi-N3O" secondAttribute="leading" id="Yis-PK-4vG"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="ggm-9o-91y" secondAttribute="trailing" constant="-20" id="aDl-Zd-Guq"/>
                             <constraint firstItem="3aW-Qi-N3O" firstAttribute="bottom" secondItem="jCN-hr-qPb" secondAttribute="bottom" id="acj-GQ-wF8"/>
                             <constraint firstItem="eoU-ka-mUd" firstAttribute="top" secondItem="pBX-nP-Wte" secondAttribute="bottom" id="b6h-HF-pIg"/>
                             <constraint firstItem="o0q-tw-mAa" firstAttribute="top" secondItem="IEN-Vp-A7V" secondAttribute="topMargin" constant="44" id="bWW-a6-ATd"/>
                             <constraint firstItem="pBX-nP-Wte" firstAttribute="leading" secondItem="IEN-Vp-A7V" secondAttribute="leading" id="cpb-Fl-qEy"/>
                             <constraint firstItem="pBX-nP-Wte" firstAttribute="top" secondItem="o0q-tw-mAa" secondAttribute="bottom" constant="1" id="eDM-Ya-bYG"/>
                             <constraint firstAttribute="bottomMargin" secondItem="eoU-ka-mUd" secondAttribute="bottom" constant="-1" id="irp-49-dmD"/>
+                            <constraint firstItem="ggm-9o-91y" firstAttribute="leading" secondItem="IEN-Vp-A7V" secondAttribute="leadingMargin" constant="-20" id="kPG-tN-AvX"/>
                             <constraint firstAttribute="trailing" secondItem="3aW-Qi-N3O" secondAttribute="trailing" id="prl-Js-plN"/>
                             <constraint firstItem="eoU-ka-mUd" firstAttribute="trailing" secondItem="pBX-nP-Wte" secondAttribute="trailing" id="ued-IU-YfQ"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="ggm-9o-91y" secondAttribute="trailing" constant="-20" id="zgX-e7-mp0"/>
                         </constraints>
                     </view>
                     <connections>
@@ -147,6 +158,7 @@
                         <outlet property="collView" destination="pBX-nP-Wte" id="u91-tS-omn"/>
                         <outlet property="flowLayoutControl" destination="eTN-0x-fYT" id="CNv-Pk-JwW"/>
                         <outlet property="mapView" destination="o0q-tw-mAa" id="jaB-vy-Jjb"/>
+                        <outlet property="noImageLabel" destination="ggm-9o-91y" id="vSi-gY-Gpn"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="d8g-DH-tdN" userLabel="First Responder" sceneMemberID="firstResponder"/>

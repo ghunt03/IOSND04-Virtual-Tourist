@@ -48,6 +48,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		010617451D12C4830006451A /* Model 4.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "Model 4.xcdatamodel"; sourceTree = "<group>"; };
 		01B435271D069982002C0BF4 /* VirtualTourist.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VirtualTourist.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		01B4352A1D069982002C0BF4 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		01B4352F1D069983002C0BF4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -627,11 +628,12 @@
 		01B435641D098932002C0BF4 /* Model.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				010617451D12C4830006451A /* Model 4.xcdatamodel */,
 				01B435981D0C046F002C0BF4 /* Model 3.xcdatamodel */,
 				01B4357D1D0BD588002C0BF4 /* Model 2.xcdatamodel */,
 				01B435651D098932002C0BF4 /* Model.xcdatamodel */,
 			);
-			currentVersion = 01B435981D0C046F002C0BF4 /* Model 3.xcdatamodel */;
+			currentVersion = 010617451D12C4830006451A /* Model 4.xcdatamodel */;
 			path = Model.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
