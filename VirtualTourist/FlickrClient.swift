@@ -63,7 +63,7 @@ class FlickrClient: NSObject {
         completionHandlerForConvertData(result: parsedResult, error: nil)
     }
     
-    
+    // Create a url based on the parameters provided
     class func urlFromParameters(parameters: [String:AnyObject], withPathExtension: String? = nil) -> NSURL {
         
         let components = NSURLComponents()
@@ -95,6 +95,7 @@ class FlickrClient: NSObject {
         return createTask(request, completionHandlerForTask: completionHandlerForGET)
     }
     
+    // GET Image with a NSURL Request
     func taskForGETImageMethod(imageUrl: String, completionHanlderForGETImage: (results: NSData!, error: String?)->Void) -> NSURLSessionDataTask {
         let imgURL: NSURL = NSURL(string: imageUrl)!
         let request: NSURLRequest = NSURLRequest(URL: imgURL)

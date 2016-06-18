@@ -9,6 +9,8 @@
 import Foundation
 
 extension FlickrClient {
+    
+    // MARK: Flickr Constants
     struct Constants {
         static let ApiScheme = "https"
         static let ApiHost = "api.flickr.com"
@@ -22,6 +24,7 @@ extension FlickrClient {
         static let MaxPages = 40
     }
     
+    // MARK: Flickr Parameters
     struct ParameterKeys {
         static let Method = "method"
         static let APIKey = "api_key"
@@ -51,6 +54,8 @@ extension FlickrClient {
         static let Radius = "5"
     }
     
+    
+    // MARK: Flickr Response Keys
     struct ResponseKeys {
         static let Photos = "photos"
         static let PhotoList = "photo"
