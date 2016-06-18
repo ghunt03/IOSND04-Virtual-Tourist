@@ -61,7 +61,14 @@ class CollectionViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         
         fetchedResultsController.delegate = self
         fetchData()
-        
+        if (fetchedResultsController.fetchedObjects?.count == 0) {
+            print("no images")
+            noImageLabel.hidden = false
+        }
+        else {
+            noImageLabel.hidden = true
+            actionButton.enabled = true
+        }
         
     }
     
@@ -69,13 +76,7 @@ class CollectionViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
     func fetchData() {
         do {
             try fetchedResultsController.performFetch()
-            if (fetchedResultsController.fetchedObjects?.count == 0) {
-                print("no images")
-                noImageLabel.hidden = false
-            }
-            else {
-                noImageLabel.hidden = true
-            }
+            
         }catch(let error){
             print(error)
         }
