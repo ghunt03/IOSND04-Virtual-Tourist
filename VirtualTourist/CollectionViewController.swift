@@ -11,7 +11,7 @@ import UIKit
 import MapKit
 import CoreData
 
-class CollectionViewController: UIViewController, MKMapViewDelegate, NSFetchedResultsControllerDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
+class CollectionViewController: UIViewController, MKMapViewDelegate {
 
     @IBOutlet weak var mapView: MKMapView!
     var location: Pin!
@@ -38,10 +38,7 @@ class CollectionViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         super.viewDidLoad()
     }
     
-    var sharedDataInstance: CoreDataStack {
-        let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        return delegate.stack
-    }
+
     
     
 
@@ -71,12 +68,15 @@ class CollectionViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         }
         
     }
-    
+
+    var sharedDataInstance: CoreDataStack {
+        let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        return delegate.stack
+    }
     
     func fetchData() {
         do {
             try fetchedResultsController.performFetch()
-            
         }catch(let error){
             print(error)
         }
@@ -142,26 +142,73 @@ class CollectionViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
             self.collView.reloadData()
         }
     }
+}
+
+
+// MARK: NSFetchedResultsControllerDelegate functions
+extension CollectionViewController: NSFetchedResultsControllerDelegate {
+    func controller(controller: NSFetchedResultsController, didChangeSection sectionInfo: NSFetchedResultsSectionInfo, atIndex sectionIndex: Int, forChangeType type: NSFetchedResultsChangeType) {
+        switch type {
+            case .Insert:
+                collView.insertSections(NSIndexSet(index: sectionIndex))
+            case .Delete:
+                collView.deleteSections(NSIndexSet(index: sectionIndex))
+            default:
+                return
+        }
+    }
     
+    func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
+        switch type {
+            case .Insert:
+                insertedCellIndexes.append(newIndexPath!)
+            case .Delete:
+                deletedCellIndexes.append(indexPath!)
+            case .Move:
+                collView.deleteItemsAtIndexPaths([indexPath!])
+                collView.insertItemsAtIndexPaths([newIndexPath!])
+            case .Update:
+                updatedCellIndexes.append(indexPath!)
+        }
+    }
     
-    //MARK: - Collection View Data Source methods
-    
-    func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
+    func controllerWillChangeContent(controller: NSFetchedResultsController) {
         
+        //Reset the arrays that track the indexPaths to handle the changes in content
+        deletedCellIndexes.removeAll()
+        insertedCellIndexes.removeAll()
+        updatedCellIndexes.removeAll()
+    }
+    
+    func controllerDidChangeContent(controller: NSFetchedResultsController) {
+        if controller.fetchedObjects?.count > 0 {
+            actionButton.enabled = true
+        }
+        collView.performBatchUpdates({ () -> Void in
+            for indexPath in self.insertedCellIndexes {
+                self.collView.insertItemsAtIndexPaths([indexPath])
+            }
+            for indexPath in self.deletedCellIndexes {
+                self.collView.deleteItemsAtIndexPaths([indexPath])
+            }
+            for indexPath in self.updatedCellIndexes {
+                self.collView.reloadItemsAtIndexPaths([indexPath])
+            }
+            }, completion: nil)
+    }
+}
+
+// MARK: CollectionViewDelegate and CollectionView data source functions
+extension CollectionViewController: UICollectionViewDelegate, UICollectionViewDataSource {
+    func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
         return self.fetchedResultsController.sections?.count ?? 0
     }
     
     
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        
         let sectionInfo = self.fetchedResultsController.sections![section]
-        
         return sectionInfo.numberOfObjects
-        
     }
-    
-    
-    
     
     
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath){
@@ -169,7 +216,7 @@ class CollectionViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         if let index = selectedCellIndexes.indexOf(indexPath){
             selectedCellIndexes.removeAtIndex(index)
             cell!.layer.borderWidth = 0
-
+            
         } else {
             selectedCellIndexes.append(indexPath)
             cell!.layer.borderColor = UIColor.redColor().CGColor
@@ -201,62 +248,5 @@ class CollectionViewController: UIViewController, MKMapViewDelegate, NSFetchedRe
         }
         return cell
     }
-    
-    func controller(controller: NSFetchedResultsController, didChangeSection sectionInfo: NSFetchedResultsSectionInfo, atIndex sectionIndex: Int, forChangeType type: NSFetchedResultsChangeType) {
-        switch type {
-            case .Insert:
-                collView.insertSections(NSIndexSet(index: sectionIndex))
-            case .Delete:
-                collView.deleteSections(NSIndexSet(index: sectionIndex))
-            default:
-                return
-        }
-    }
-    
-    func controller(controller: NSFetchedResultsController,
-        didChangeObject anObject: AnyObject,
-        atIndexPath indexPath: NSIndexPath?,
-        forChangeType type: NSFetchedResultsChangeType,
-        newIndexPath: NSIndexPath?) {
-            
-            
-            switch type {
-                case .Insert:
-                    insertedCellIndexes.append(newIndexPath!)
-                case .Delete:
-                    deletedCellIndexes.append(indexPath!)
-                case .Move:
-                    collView.deleteItemsAtIndexPaths([indexPath!])
-                    collView.insertItemsAtIndexPaths([newIndexPath!])
-            case .Update:
-                updatedCellIndexes.append(indexPath!)
-        }
-    }
-    
-    func controllerWillChangeContent(controller: NSFetchedResultsController) {
-        
-        //Reset the arrays that track the indexPaths to handle the changes in content
-        deletedCellIndexes.removeAll()
-        insertedCellIndexes.removeAll()
-        updatedCellIndexes.removeAll()
-    }
-    
-    func controllerDidChangeContent(controller: NSFetchedResultsController) {
-        if controller.fetchedObjects?.count > 0 {
-            actionButton.enabled = true
-        }
-        collView.performBatchUpdates({ () -> Void in
-            for indexPath in self.insertedCellIndexes {
-                self.collView.insertItemsAtIndexPaths([indexPath])
-            }
-            for indexPath in self.deletedCellIndexes {
-                self.collView.deleteItemsAtIndexPaths([indexPath])
-            }
-            for indexPath in self.updatedCellIndexes {
-                self.collView.reloadItemsAtIndexPaths([indexPath])
-            }
-        }, completion: nil)
-    }
-    
 
 }

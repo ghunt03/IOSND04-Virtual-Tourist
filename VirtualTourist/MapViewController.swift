@@ -129,7 +129,10 @@ class MapViewController: UIViewController {
         }
     }
     
+    
+    
     func setPersistedMapLocation() {
+        // set map region based on details saved in Standard User Defaults
         let latitudeDelta = NSUserDefaults.standardUserDefaults().doubleForKey(MapViewConstants.Constants.latDelta)
         let longitudeDelta = NSUserDefaults.standardUserDefaults().doubleForKey(MapViewConstants.Constants.longDelta)
         let latitude = NSUserDefaults.standardUserDefaults().doubleForKey(MapViewConstants.Constants.lat)
