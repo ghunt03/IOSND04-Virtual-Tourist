@@ -11,10 +11,11 @@ import UIKit
 import MapKit
 import CoreData
 
-class MapViewController: UIViewController, MKMapViewDelegate {
+class MapViewController: UIViewController {
     
     @IBOutlet var mapView: MKMapView!
     @IBOutlet weak var editButton: UIBarButtonItem!
+
     var removeMode: Bool = false
     var label: UILabel?
     let flickrClient = FlickrClient.sharedInstance
@@ -29,6 +30,8 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     
     override func viewWillAppear(animated: Bool) {
         super.viewWillAppear(animated)
+    
+        // add gesture recognizer to map view for long press
         let longPress = UILongPressGestureRecognizer(target: self, action: "dropPin:")
         longPress.minimumPressDuration = 2.0
         mapView.addGestureRecognizer(longPress)
@@ -91,7 +94,10 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         }
     }
     
+    
+    // MARK: Add a location to the map and start downloading images
     func dropPin(gestureRecognizer:UIGestureRecognizer) {
+        
         let touchPoint = gestureRecognizer.locationInView(self.mapView)
         let newCoord:CLLocationCoordinate2D = mapView.convertPoint(touchPoint, toCoordinateFromView: self.mapView)
         let newAnotation = MKPointAnnotation()
@@ -133,25 +139,21 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         mapView.setRegion(region, animated: true)
     }
     
-    func mapView(mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
-        let center = mapView.centerCoordinate
-        let regionSpan = mapView.region.span
-        NSUserDefaults.standardUserDefaults().setDouble(center.latitude, forKey: MapViewConstants.Constants.lat)
-        NSUserDefaults.standardUserDefaults().setDouble(center.longitude, forKey: MapViewConstants.Constants.long)
-        NSUserDefaults.standardUserDefaults().setDouble(regionSpan.latitudeDelta, forKey: MapViewConstants.Constants.latDelta)
-        NSUserDefaults.standardUserDefaults().setDouble(regionSpan.longitudeDelta, forKey: MapViewConstants.Constants.longDelta)
-    }
+    
     
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if (segue.identifier == "displayLocation") {
-
+            let backItem = UIBarButtonItem()
+            backItem.title = "Map"
+            navigationItem.backBarButtonItem = backItem
             if let locationVC = segue.destinationViewController as? CollectionViewController {
                 locationVC.location = (sender as! Pin)
             }
         }
     }
     
+    // MARK: Get Pin based on coordinates
     
     func getLocationByCoordinates(latitude: Double, longitude: Double) -> Pin? {
         let fr = NSFetchRequest(entityName: "Pin")
@@ -175,6 +177,15 @@ class MapViewController: UIViewController, MKMapViewDelegate {
     }
     
     
+    
+    
+    
+    
+}
+
+// MARK: MapView Delegate functions
+extension MapViewController: MKMapViewDelegate {
+
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
         let coords = view.annotation?.coordinate
         let pin = getLocationByCoordinates((coords?.latitude)!, longitude: (coords?.longitude)!)
@@ -189,6 +200,12 @@ class MapViewController: UIViewController, MKMapViewDelegate {
         }
     }
     
-    
-    
+    func mapView(mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+        let center = mapView.centerCoordinate
+        let regionSpan = mapView.region.span
+        NSUserDefaults.standardUserDefaults().setDouble(center.latitude, forKey: MapViewConstants.Constants.lat)
+        NSUserDefaults.standardUserDefaults().setDouble(center.longitude, forKey: MapViewConstants.Constants.long)
+        NSUserDefaults.standardUserDefaults().setDouble(regionSpan.latitudeDelta, forKey: MapViewConstants.Constants.latDelta)
+        NSUserDefaults.standardUserDefaults().setDouble(regionSpan.longitudeDelta, forKey: MapViewConstants.Constants.longDelta)
+    }
 }
